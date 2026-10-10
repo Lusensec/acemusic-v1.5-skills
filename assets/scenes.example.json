@@ -1,0 +1,22 @@
+{
+  "out_dir": "acemusic_out",
+  "comment": "漫剧/短剧场景 BGM 场景表。每条生成一个 mp3。prompt 里直接写时长（建议 ≤15 秒，网关 60s 超时限制），风格/乐器/BPM/调式。",
+  "tracks": [
+    {
+      "name": "opener_anime",
+      "prompt": "15秒 动漫风BGM，纯音乐，轻快电子+钢琴，120BPM，阳光积极"
+    },
+    {
+      "name": "battle_rock",
+      "prompt": "15秒 热血动漫战斗BGM，摇滚电吉他+鼓组，150BPM，紧张激昂"
+    },
+    {
+      "name": "guofeng_calm",
+      "prompt": "15秒 国风BGM，古筝+竹笛+弦乐铺底，80BPM，D小调，忧伤抒情"
+    },
+    {
+      "name": "transition_sfx",
+      "prompt": "10秒 转场音效音乐，轻盈lofi节拍+钢琴音色，100BPM"
+    }
+  ]
+}

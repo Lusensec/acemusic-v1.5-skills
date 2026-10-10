@@ -1,0 +1,13 @@
+# API keys (never commit)
+.acemusic_key
+~/.acemusic_key
+
+# generated audio + scratch
+acemusic_out/
+out/
+*.mp3
+!assets/**/*.mp3
+
+# python
+__pycache__/
+*.pyc
