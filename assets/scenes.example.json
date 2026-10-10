@@ -1,22 +1,45 @@
 {
   "out_dir": "acemusic_out",
-  "comment": "漫剧/短剧场景 BGM 场景表。每条生成一个 mp3。prompt 里直接写时长（建议 ≤15 秒，网关 60s 超时限制），风格/乐器/BPM/调式。",
+  "comment": "漫剧/短剧场景 BGM 场景表。每条生成一个 mp3。可选音乐参数（逐条覆盖 CLI 默认值）：bpm(30-300)、duration(10-600秒)、key_scale(如 'C Major'/'Am')、time_signature(2/3/4/6→2/4、3/4、4/4、6/8)、lyrics、vocal_language(默认 en，中文用 zh)、thinking(bool)、instrumental(bool)、seed、top_p、temperature、model。camelCase 别名同样可用（keyScale/audioDuration 等）。prompt 里直接写风格描述；结构化参数未生效时 CLI 会自动把参数提示并入 prompt。",
   "tracks": [
     {
       "name": "opener_anime",
-      "prompt": "15秒 动漫风BGM，纯音乐，轻快电子+钢琴，120BPM，阳光积极"
+      "prompt": "动漫风BGM，轻快电子+钢琴，阳光积极",
+      "bpm": 120,
+      "duration": 15,
+      "instrumental": true,
+      "seed": 42
     },
     {
       "name": "battle_rock",
-      "prompt": "15秒 热血动漫战斗BGM，摇滚电吉他+鼓组，150BPM，紧张激昂"
+      "prompt": "热血动漫战斗BGM，摇滚电吉他+鼓组，紧张激昂",
+      "bpm": 150,
+      "key_scale": "A Minor",
+      "duration": 15,
+      "instrumental": true
     },
     {
       "name": "guofeng_calm",
-      "prompt": "15秒 国风BGM，古筝+竹笛+弦乐铺底，80BPM，D小调，忧伤抒情"
+      "prompt": "国风BGM，古筝+竹笛+弦乐铺底，忧伤抒情",
+      "bpm": 80,
+      "key_scale": "D Minor",
+      "time_signature": "4",
+      "duration": 15,
+      "instrumental": true
     },
     {
       "name": "transition_sfx",
-      "prompt": "10秒 转场音效音乐，轻盈lofi节拍+钢琴音色，100BPM"
+      "prompt": "转场音效音乐，轻盈lofi节拍+钢琴音色",
+      "bpm": 100,
+      "duration": 10
+    },
+    {
+      "name": "theme_song_draft",
+      "prompt": "国风女声主题曲，缓慢抒情，竹笛前奏",
+      "lyrics": "月光洒在古巷上，青石板路响",
+      "vocal_language": "zh",
+      "thinking": true,
+      "duration": 30
     }
   ]
 }

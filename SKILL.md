@@ -24,8 +24,8 @@ spot for the API's 60-second gateway timeout.
 - **Use** for: scene BGM (漫剧/短剧/视频配乐), loop stings, theme-song drafts,
   instrumentals, lyric+vocal tracks (retry-heavy).
 - **Do not use** for: character dialogue / narration TTS (use EdgeTTS,
-  CosyVoice, iFlytek, …), or for >60s single-shot generation (run ACE-Step
-  locally instead).
+  CosyVoice, iFlytek, …), or for >60s single-shot generation (the cloud
+  gateway times out at ~60s — split into short clips instead).
 
 ## Prerequisites
 
@@ -35,26 +35,59 @@ spot for the API's 60-second gateway timeout.
 
 ## Quick start
 
-Run the CLI from `scripts/` (paths relative to this skill directory):
+Run the CLI from the skill root (paths relative to this skill directory):
 
 ```bash
 # 1) list models + pricing
 python scripts/acemusic.py models
 
 # 2) generate one short BGM clip (name = output base name)
-python scripts/acemusic.py gen "15秒 动漫风BGM，国风电子，古筝+合成器，120BPM" --name opener
+python scripts/acemusic.py gen "15秒 动漫风BGM，国风电子，120BPM" --name opener
 
-# 3) batch-generate a scene table (漫剧 one-episode BGM set)
+# 3) generate with explicit music parameters
+python scripts/acemusic.py gen "战斗BGM" --bpm 150 --keyscale "A Minor" --duration 30 --instrumental
+
+# 4) batch-generate a scene table (漫剧 one-episode BGM set)
 python scripts/acemusic.py batch assets/scenes.example.json --out out/
 ```
 
 - `gen` writes `<out>/<name>_<HHMMSS>.mp3` and prints size / estimated duration
   / caption. `--json` appends a machine-readable summary (paths, attempts, secs).
 - `batch` reads `assets/scenes.example.json`-shaped JSON: a `tracks` list of
-  `{name, prompt, [model], [temperature], [retries]}` plus an optional top-level
-  `out_dir`. It prints a per-track result table + JSON.
+  `{name, prompt, [model], [temperature], [retries], [music params…]}` plus an
+  optional top-level `out_dir`. It prints a per-track result table + JSON.
 - Prompts: put duration in the text ("15秒 …"), plus style/instruments/BPM/key.
   Keep clips ≤15s for high success rate.
+
+## Optional music parameters (all subcommands except `models`)
+
+Every generation accepts these optional parameters (CLI flag ↔ batch JSON
+field; batch fields also accept camelCase aliases such as `keyScale`):
+
+| Flag | Batch JSON field | Meaning (ACE-Step official docs) |
+|---|---|---|
+| `--top-p` | `top_p` / `topP` | sampling top-p (documented `supported_sampling_parameters`) |
+| `--duration N` | `duration` / `audio_duration` | target length in seconds (documented 10–600) |
+| `--bpm N` | `bpm` | tempo, 30–300 |
+| `--keyscale "C Major"` | `key_scale` / `keyScale` | key/scale. Note: `--key` is the **API key**; musical key is `--keyscale` |
+| `--time-signature 4` | `time_signature` | code `2/3/4/6` → 2/4, 3/4, 4/4, 6/8 |
+| `--lyrics "…"` | `lyrics` | lyrics text for vocal tracks |
+| `--vocal-language zh` | `vocal_language` | vocal language code (default `en`; use `zh` for Chinese vocals) |
+| `--thinking` | `thinking` | LM planning mode, quality boost |
+| `--instrumental` | `instrumental` | force pure instrumental (no vocals) |
+| `--seed N` | `seed` | fixed seed for reproducibility |
+| `--temperature T` | `temperature` | sampling temperature (default 0.9) |
+
+**Routing (auto):** each set parameter is sent as a structured API field
+**and** merged into the prompt text as a hint (only when the prompt does not
+already cover it). So the intent survives even if the gateway ignores unknown
+fields; if the gateway rejects them (HTTP 400), the CLI automatically retries
+with standard fields only. Field-by-field behavior matrix:
+`references/api-notes.md` (§ Cloud field probe).
+
+For 漫剧 scene tables, set `bpm`/`duration`/`key_scale`/`seed` per track to
+keep an episode's BGM set stylistically consistent, and use `--instrumental`
+plus `--lyrics` for theme-song drafts.
 
 ## 504 / gateway-timeout policy
 
@@ -62,8 +95,10 @@ The gateway hard-times-out synchronous requests at ~60s (504 = Cloudflare
 page, often still "working"). The CLI already retries retryable codes
 (429/5xx) with linear backoff (`--retries N`, `--retry-wait S`).
 
-- On a final failure: shorten the prompt/duration and retry, or run locally.
-- Re-issuing the same prompt at a quieter moment usually succeeds.
+- On a final failure: shorten the prompt/duration and retry, or re-issue later
+  (load-dependent; the same prompt often succeeds off-peak).
+- Longer targets (`--duration` > 20s) spend more of the 60s window — expect
+  more retries; prefer ≤15s clips for scene BGM.
 
 ## Verifying outputs
 
